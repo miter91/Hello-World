@@ -1,0 +1,164 @@
+
+
+# Stored Procedure Extraction Guide
+
+## Purpose
+
+This guide will help you extract all stored procedures from the VISTA_STAGING and VISTA_REPORTING databases for code comparison and audit purposes.
+
+## Requirements
+
+- Access to SQL Server Management Studio (SSMS)
+- Read permissions on VISTA_STAGING and VISTA_REPORTING databases
+- Ability to run SELECT queries on system tables
+
+## Step-by-Step Instructions
+
+### Step 1: Open SQL Server Management Studio
+
+1. Launch SQL Server Management Studio
+2. Connect to the SQL Server instance containing the VISTA databases
+3. Ensure you can see both VISTA_STAGING and VISTA_REPORTING in the Object Explorer
+
+### Step 2: Extract Stored Procedures from VISTA_STAGING
+
+1. **Copy the SQL script below** into a new query window:
+
+sql
+
+```sql
+-- SQL Script to Extract All Stored Procedures from VISTA_STAGING
+SET NOCOUNT ON;
+
+DECLARE @DatabaseName NVARCHAR(128) = 'VISTA_STAGING'; -- DO NOT CHANGE THIS
+DECLARE @OutputPath NVARCHAR(500) = 'C:\Temp\' + @DatabaseName + '_StoredProcs_' + 
+                                     CONVERT(VARCHAR(8), GETDATE(), 112) + '_' +
+                                     REPLACE(CONVERT(VARCHAR(8), GETDATE(), 108), ':', '') + '.txt';
+
+-- Create temporary table to store results
+CREATE TABLE #StoredProcedures (
+    DatabaseName NVARCHAR(128),
+    SchemaName NVARCHAR(128),
+    ProcedureName NVARCHAR(128),
+    ProcedureDefinition NVARCHAR(MAX),
+    CreateDate DATETIME,
+    ModifyDate DATETIME
+);
+
+-- Switch to the target database and extract stored procedures
+DECLARE @SQL NVARCHAR(MAX) = '
+USE [' + @DatabaseName + '];
+INSERT INTO #StoredProcedures
+SELECT 
+    DB_NAME() AS DatabaseName,
+    SCHEMA_NAME(p.schema_id) AS SchemaName,
+    p.name AS ProcedureName,
+    m.definition AS ProcedureDefinition,
+    p.create_date AS CreateDate,
+    p.modify_date AS ModifyDate
+FROM sys.procedures p
+INNER JOIN sys.sql_modules m ON p.object_id = m.object_id
+WHERE p.is_ms_shipped = 0
+ORDER BY SCHEMA_NAME(p.schema_id), p.name;
+';
+
+EXEC sp_executesql @SQL;
+
+-- Format output with clear delimiters
+SELECT 
+    '=== STORED PROCEDURE START ===' + CHAR(13) + CHAR(10) +
+    'Database: ' + DatabaseName + CHAR(13) + CHAR(10) +
+    'Schema: ' + SchemaName + CHAR(13) + CHAR(10) +
+    'Name: ' + ProcedureName + CHAR(13) + CHAR(10) +
+    'CreateDate: ' + CONVERT(VARCHAR(30), CreateDate, 121) + CHAR(13) + CHAR(10) +
+    'ModifyDate: ' + CONVERT(VARCHAR(30), ModifyDate, 121) + CHAR(13) + CHAR(10) +
+    '--- DEFINITION START ---' + CHAR(13) + CHAR(10) +
+    ProcedureDefinition + CHAR(13) + CHAR(10) +
+    '--- DEFINITION END ---' + CHAR(13) + CHAR(10) +
+    '=== STORED PROCEDURE END ===' + CHAR(13) + CHAR(10) + CHAR(13) + CHAR(10)
+FROM #StoredProcedures
+ORDER BY SchemaName, ProcedureName;
+
+-- Clean up
+DROP TABLE #StoredProcedures;
+
+PRINT 'Extraction complete. Please save the results to a text file.';
+```
+
+2. **Execute the script** by pressing F5 or clicking the Execute button
+3. **Save the results**:
+    - In the Results pane (bottom window), click anywhere in the results
+    - Press `Ctrl+A` to select all
+    - Press `Ctrl+C` to copy
+    - Open Notepad
+    - Press `Ctrl+V` to paste
+    - Save the file with this exact name: **`VISTA_STAGING_StoredProcs_M&G_YYYYMMDD.txt`**
+        - Replace YYYYMMDD with today's date (e.g., 20250701)
+        - Example: `VISTA_STAGING_StoredProcs_M&G_20250701.txt`
+
+### Step 3: Extract Stored Procedures from VISTA_REPORTING
+
+1. **Use the same SQL script** but change line 4:
+    
+    sql
+    
+    ```sql
+    DECLARE @DatabaseName NVARCHAR(128) = 'VISTA_REPORTING'; -- CHANGE TO VISTA_REPORTING
+    ```
+    
+2. **Execute the script** (F5)
+3. **Save the results** following the same process as above, but name the file: **`VISTA_REPORTING_StoredProcs_M&G_YYYYMMDD.txt`**
+    - Example: `VISTA_REPORTING_StoredProcs_M&G_20250701.txt`
+
+### Step 4: Verify Your Files
+
+You should now have two text files:
+
+1. `VISTA_STAGING_StoredProcs_M&G_20250701.txt`
+2. `VISTA_REPORTING_StoredProcs_M&G_20250701.txt`
+
+Each file should:
+
+- Be in plain text format (.txt)
+- Contain multiple stored procedures
+- Show the structured format with === markers
+
+**Sample of what the content should look like:**
+
+```
+=== STORED PROCEDURE START ===
+Database: VISTA_STAGING
+Schema: dbo
+Name: GetUserData
+CreateDate: 2024-03-15 10:30:00.000
+ModifyDate: 2024-06-20 14:45:00.000
+--- DEFINITION START ---
+CREATE PROCEDURE [dbo].[GetUserData]
+    @UserID INT
+AS
+BEGIN
+    SELECT * FROM Users WHERE UserID = @UserID
+END
+--- DEFINITION END ---
+=== STORED PROCEDURE END ===
+```
+
+### Step 5: Send the Files
+
+Email both text files to Deloitte with:
+
+- Subject: "VISTA Database Stored Procedures Export - M&G - [Date]"
+- Attach both files:
+    - `VISTA_STAGING_StoredProcs_M&G_YYYYMMDD.txt`
+    - `VISTA_REPORTING_StoredProcs_M&G_YYYYMMDD.txt`
+
+## Important Notes
+
+1. **File Naming**: Please use the exact naming convention specified. The word "M&G" in the filename helps distinguish your files from ours.
+2. **File Format**: Save as plain text files (.txt), not Word documents or other formats.
+3. **Complete Export**: The script exports ALL stored procedures. The results might be large - this is normal.
+4. **Timing**: Please complete this extraction and send the files at the end of data migration.
+5. **Issues**: If you encounter any errors:
+    - Verify you have read permissions on both databases
+    - Ensure you're connected to the correct SQL Server instance
+    - Contact Deloitte with the specific error message
