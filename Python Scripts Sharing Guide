@@ -1,0 +1,72 @@
+# Python Script Sharing Guide for Code Comparison
+
+## Purpose
+We need to compare the Python scripts we provided with the versions currently running in your environment to ensure they haven't been modified and are functioning as intended.
+
+## Scripts to Share
+Please provide the following 5 Python scripts that were part of the data migration project:
+
+1. **read_apis.py
+2. **read_cash_fx_apis.py
+3. **read_treasury_apis.py
+4. **create_tables.py
+5. **db_connection.py
+
+*Note: If your script names differ, please provide the equivalent scripts that handle these functions.*
+
+## How to Share the Scripts
+
+### Option 1: Direct File Sharing (Recommended)
+1. Locate the Python scripts in your environment
+2. Create a new folder on your desktop called `VISTA_Python_Scripts_M&G`
+3. Copy the 5 Python files into this folder
+4. Zip the folder:
+   - Right-click on the folder
+   - Select "Send to" → "Compressed (zipped) folder"
+5. Name the zip file: `VISTA_Python_Scripts_M&G_YYYYMMDD.zip`
+   - Replace YYYYMMDD with today's date (e.g., 20250701)
+
+### Option 2: Individual Files
+If you cannot zip the files, send them individually but please:
+1. Keep the original filenames
+2. Add `_M&G` suffix before the `.py` extension
+   - Example: `read_apis.py` → `read_apis_M&G.py`
+
+## Important Guidelines
+
+### ✅ DO:
+- Send the actual `.py` files (not screenshots or PDFs)
+- Include all 5 scripts even if you think they haven't changed
+- Maintain the original file structure and names where possible
+- Include any custom utility scripts that these main scripts import
+
+### ❌ DON'T:
+- Modify or "clean up" the code before sending
+- Remove comments or documentation
+- Change file encodings (keep as UTF-8)
+- Send compiled files (.pyc) - we need the source .py files
+
+## File Checklist
+Before sending, verify you have:
+- [ ] All 5 main Python scripts
+- [ ] Any additional utility/helper scripts they import
+- [ ] Original filenames preserved (with _M&G suffix if sending individually)
+- [ ] Files are in .py format (not .pyc or other formats)
+
+## Security Note
+These scripts should not contain:
+- Hardcoded passwords or API keys (these should be in separate config files)
+- Production database connection strings
+- Sensitive business logic that wasn't part of the original delivery
+
+If you find such information, please:
+1. Make a copy of the file
+2. Replace sensitive values with placeholders like `<REMOVED_PASSWORD>`
+3. Note which files had modifications in your email
+
+## Sending Instructions
+
+**Email Subject**: Python Scripts for Code Comparison - M&G - [Date]
+
+## Timeline
+Please send these files at the end of the Data Migration process
