@@ -1,0 +1,37 @@
+=== STORED PROCEDURE START ===
+Database: VISTA_STAGING
+Schema: dbo
+Name: TestProcedure
+CreateDate: 2024-01-01 10:00:00.000
+ModifyDate: 2024-02-15 14:30:00.000
+--- DEFINITION START ---
+CREATE PROCEDURE [dbo].[TestProcedure]
+    @UserID INT,
+    @StartDate DATETIME
+AS
+BEGIN
+    -- Added comment
+    SELECT UserID, UserName, 
+           CreateDate  -- Removed CAST
+    FROM Users
+    WHERE UserID = @UserID
+      AND CreateDate >= @StartDate
+      AND IsActive = 1  -- Added condition
+END
+--- DEFINITION END ---
+=== STORED PROCEDURE END ===
+
+=== STORED PROCEDURE START ===
+Database: VISTA_STAGING
+Schema: dbo
+Name: NewProcedure
+CreateDate: 2024-01-01 10:00:00.000
+ModifyDate: 2024-01-01 10:00:00.000
+--- DEFINITION START ---
+CREATE PROCEDURE [dbo].[NewProcedure]
+AS
+BEGIN
+    SELECT 'This is new'
+END
+--- DEFINITION END ---
+=== STORED PROCEDURE END ===
