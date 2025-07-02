@@ -102,10 +102,10 @@ class StoredProcedureComparer:
         source_names = set(self.source_procs.keys())
         target_names = set(self.target_procs.keys())
         
-        # Procedures only in source
+        # Procedures only in source (missing in target)
         only_in_source = source_names - target_names
         
-        # Procedures only in target
+        # Procedures only in target (extra in target)
         only_in_target = target_names - source_names
         
         # Procedures in both but different
@@ -148,21 +148,25 @@ class StoredProcedureComparer:
             f.write(f"Procedures only in target: {len(only_in_target)}\n")
             f.write(f"Procedures with differences: {len(different_procs)}\n\n")
             
-            # List procedures only in source
+            # List procedures only in source (missing in target)
             if only_in_source:
                 f.write("PROCEDURES ONLY IN SOURCE (Missing in Target):\n")
                 f.write("-" * 80 + "\n")
                 for proc_name in sorted(only_in_source):
                     f.write(f"  - {proc_name}\n")
                 f.write("\n")
+            else:
+                f.write("PROCEDURES ONLY IN SOURCE (Missing in Target): None\n\n")
             
-            # List procedures only in target
+            # List procedures only in target (extra in target)
             if only_in_target:
                 f.write("PROCEDURES ONLY IN TARGET (Not in Source):\n")
                 f.write("-" * 80 + "\n")
                 for proc_name in sorted(only_in_target):
                     f.write(f"  - {proc_name}\n")
                 f.write("\n")
+            else:
+                f.write("PROCEDURES ONLY IN TARGET (Not in Source): None\n\n")
             
             # List procedures with differences
             if different_procs:
@@ -170,6 +174,22 @@ class StoredProcedureComparer:
                 f.write("-" * 80 + "\n")
                 for proc_name in sorted(different_procs.keys()):
                     f.write(f"  - {proc_name}\n")
+                f.write("\n")
+            else:
+                f.write("PROCEDURES WITH DIFFERENCES: None\n\n")
+                
+            # Add a quick action summary at the end
+            f.write("\n" + "=" * 80 + "\n")
+            f.write("ACTION SUMMARY:\n")
+            f.write("-" * 80 + "\n")
+            if only_in_source:
+                f.write(f"⚠️  {len(only_in_source)} procedures need to be deployed to target\n")
+            if only_in_target:
+                f.write(f"❓ {len(only_in_target)} extra procedures found in target (verify if needed)\n")
+            if different_procs:
+                f.write(f"🔄 {len(different_procs)} procedures have code differences to review\n")
+            if not only_in_source and not only_in_target and not different_procs:
+                f.write("✅ All procedures match perfectly!\n")
         
         # Detailed differences report
         if different_procs:
